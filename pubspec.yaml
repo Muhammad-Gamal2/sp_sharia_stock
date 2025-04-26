@@ -41,10 +41,14 @@ dependencies:
   # Code generation for immutable classes
   freezed: ^3.0.6
   freezed_annotation: ^3.0.0
+  # Classes and helper functions that support JSON code generation via the `json_serializable` package.
+  json_annotation: ^4.9.0
 
 dev_dependencies:
   #A build system for Dart code generation and modular compilation
   build_runner: ^2.4.15
+  # Automatically generate code for converting to and from JSON by annotating Dart classes
+  json_serializable: ^6.9.5
   flutter_test:
     sdk: flutter
 
