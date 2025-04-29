@@ -1,16 +1,69 @@
-# sp_sharia_stock
+# SP Sharia Stock
 
-A new Flutter project.
+A Flutter-based mobile application for tracking and analyzing Shariah-compliant stocks.
+
+![App Screenshot](screenshots/app_screenshot.jpeg)
+
+## Features
+
+- Stock market data visualization with candlestick charts
+- Shariah-compliant stock filtering and screening
+- Real-time stock price updates
+- Biometric authentication for secure access
+- Date filtering and custom time periods
+- Detailed stock information and analysis
+
+## Technologies Used
+
+- Flutter & Dart
+- BLoC pattern for state management
+- Dio for network requests
+- Syncfusion Flutter Charts for data visualization
+- Biometric authentication
+- JSON serialization with Freezed
 
 ## Getting Started
 
-This project is a starting point for a Flutter application.
+### Prerequisites
 
-A few resources to get you started if this is your first Flutter project:
+- Flutter SDK (version ^3.7.2)
+- Dart SDK
+- Android Studio / Xcode
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+### Installation
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+1. Clone the repository:
+   ```
+   git clone https://github.com/Muhammad-Gamal2/sp_sharia_stock.git
+   ```
+
+2. Navigate to the project directory:
+   ```
+   cd sp_sharia_stock
+   ```
+
+3. Install dependencies:
+   ```
+   flutter pub get
+   ```
+
+4. Build files from code generation:
+   ```
+   flutter packages pub run build_runner build
+   ```
+
+5. Run the app:
+   ```
+   flutter run
+   ```
+
+
+## Project Structure
+
+```
+lib/
+├── core/          # Core utilities and constants
+├── features/      # Feature modules with domain, data, and presentation layers
+└── main.dart      # Application entry point
+```
+
