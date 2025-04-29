@@ -1,5 +1,6 @@
 import 'package:sp_sharia_stock/core/networking/api_error_handler.dart';
 import 'package:sp_sharia_stock/core/networking/api_result.dart';
+import 'package:sp_sharia_stock/core/networking/api_service.dart';
 import 'package:sp_sharia_stock/features/home/data/domain/models/chart_interval.dart';
 import 'package:sp_sharia_stock/features/home/data/domain/models/chart_response.dart';
 import 'package:sp_sharia_stock/features/home/data/domain/stock_api_client.dart';
@@ -10,8 +11,9 @@ class StockRepository {
   final StockApiClient _stockApiClient;
 
   /// Creates a new StockRepository with the given [stockApiClient]
-  StockRepository({required StockApiClient stockApiClient})
-    : _stockApiClient = stockApiClient;
+  StockRepository({StockApiClient? stockApiClient})
+    : _stockApiClient =
+          stockApiClient ?? StockApiClient(apiService: ApiService());
 
   /// Fetches stock chart data for the specified date range and interval
   ///

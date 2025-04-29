@@ -103,11 +103,11 @@ abstract class Indicators with _$Indicators {
 @freezed
 abstract class Quote with _$Quote {
   const factory Quote({
-    required List<int> volume,
-    required List<double> open,
-    required List<double> high,
-    required List<double> low,
-    required List<double> close,
+    required List<int?> volume,
+    required List<double?> open,
+    required List<double?> high,
+    required List<double?> low,
+    required List<double?> close,
   }) = _Quote;
 
   factory Quote.fromJson(Map<String, dynamic> json) => _$QuoteFromJson(json);
@@ -115,7 +115,7 @@ abstract class Quote with _$Quote {
 
 @freezed
 abstract class AdjClose with _$AdjClose {
-  const factory AdjClose({required List<double> adjclose}) = _AdjClose;
+  const factory AdjClose({required List<double?> adjclose}) = _AdjClose;
 
   factory AdjClose.fromJson(Map<String, dynamic> json) =>
       _$AdjCloseFromJson(json);

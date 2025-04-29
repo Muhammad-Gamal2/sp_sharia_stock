@@ -15,22 +15,30 @@ class StockCubit extends Cubit<StockState> {
 
   StockCubit({required StockRepository stockRepository})
     : _stockRepository = stockRepository,
-      super(const StockState());
+      super(StockState());
 
   /// Fetches stock chart data for the specified date range and interval
   ///
   /// [fromDate] The start date
   /// [toDate] The end date
-  /// [interval] The data interval (day, week, month)
-  Future<void> getStockChartData({
-    required DateTime fromDate,
-    required DateTime toDate,
-  }) async {
-    emit(state.copyWith(status: RequestStatus.inProgress));
+
+  Future<void> getStockChartData({DateTime? fromDate, DateTime? toDate}) async {
+    final startDate = fromDate ?? state.startDate;
+    final endDate = toDate ?? state.endDate;
+
+    if (startDate == null || endDate == null) return;
+
+    emit(
+      state.copyWith(
+        status: RequestStatus.inProgress,
+        startDate: startDate,
+        endDate: endDate,
+      ),
+    );
 
     final result = await _stockRepository.getStockChartData(
-      fromDate: fromDate,
-      toDate: toDate,
+      fromDate: startDate,
+      toDate: endDate,
       interval: state.interval,
     );
 
@@ -54,13 +62,10 @@ class StockCubit extends Cubit<StockState> {
 
   void setInterval(ChartInterval interval) {
     emit(state.copyWith(interval: interval));
-    final now = DateTime.now();
-    final fromDate = switch (interval) {
-      ChartInterval.day => DateTime(now.year, now.month, now.day - 30),
-      ChartInterval.week => DateTime(now.year, now.month - 6, now.day),
-      ChartInterval.month => DateTime(now.year - 2, now.month, now.day),
-    };
-    final toDate = now;
-    getStockChartData(fromDate: fromDate, toDate: toDate);
+    getStockChartData();
+  }
+
+  void setDateRange(DateTime startDate, DateTime endDate) {
+    getStockChartData(fromDate: startDate, toDate: endDate);
   }
 }

@@ -7,5 +7,7 @@ abstract class StockState with _$StockState {
     StockModel? stock,
     String? error,
     @Default(ChartInterval.week) ChartInterval interval,
+    DateTime? startDate,
+    DateTime? endDate,
   }) = _StockState;
 }

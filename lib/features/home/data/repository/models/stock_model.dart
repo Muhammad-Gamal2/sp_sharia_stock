@@ -50,32 +50,34 @@ abstract class CandlestickData with _$CandlestickData {
 abstract class CandlestickEntry with _$CandlestickEntry {
   const factory CandlestickEntry({
     required int timestamp,
-    required double open,
-    required double high,
-    required double low,
-    required double close,
-    required int volume,
+    double? open,
+    double? high,
+    double? low,
+    double? close,
+    int? volume,
   }) = _CandlestickEntry;
 
   const CandlestickEntry._();
 
   /// Determines if this candle represents price increase (bullish)
-  bool get isBullish => close >= open;
+  bool get isBullish => (close ?? 0) >= (open ?? 0);
 
   /// Determines if this candle represents price decrease (bearish)
-  bool get isBearish => close < open;
+  bool get isBearish => (close ?? 0) < (open ?? 0);
 
   /// The body height of the candlestick (absolute difference between open and close)
-  double get bodyHeight => (close - open).abs();
+  double get bodyHeight => ((close ?? 0) - (open ?? 0)).abs();
 
   /// The entire range of the candlestick from high to low
-  double get fullRange => high - low;
+  double get fullRange => (high ?? 0) - (low ?? 0);
 
   /// The upper wick length (distance from body to high)
-  double get upperWickLength => isBullish ? high - close : high - open;
+  double get upperWickLength =>
+      isBullish ? (high ?? 0) - (close ?? 0) : (high ?? 0) - (open ?? 0);
 
   /// The lower wick length (distance from body to low)
-  double get lowerWickLength => isBullish ? open - low : close - low;
+  double get lowerWickLength =>
+      isBullish ? (open ?? 0) - (low ?? 0) : (close ?? 0) - (low ?? 0);
 
   factory CandlestickEntry.fromJson(Map<String, dynamic> json) =>
       _$CandlestickEntryFromJson(json);

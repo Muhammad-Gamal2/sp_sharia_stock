@@ -88,16 +88,20 @@ void main() {
           return stockCubit;
         },
         act:
-            (cubit) => cubit.getStockChartData(
-              fromDate: fromDate,
-              toDate: toDate,
-            ),
+            (cubit) =>
+                cubit.getStockChartData(fromDate: fromDate, toDate: toDate),
         expect:
             () => [
-              const StockState(status: RequestStatus.inProgress),
+              StockState(
+                status: RequestStatus.inProgress,
+                startDate: fromDate,
+                endDate: toDate,
+              ),
               StockState(
                 status: RequestStatus.success,
                 stock: mockStockModel,
+                startDate: fromDate,
+                endDate: toDate,
                 error: null,
               ),
             ],
@@ -131,16 +135,20 @@ void main() {
           return stockCubit;
         },
         act:
-            (cubit) => cubit.getStockChartData(
-              fromDate: fromDate,
-              toDate: toDate,
-            ),
+            (cubit) =>
+                cubit.getStockChartData(fromDate: fromDate, toDate: toDate),
         expect:
             () => [
-              const StockState(status: RequestStatus.inProgress),
+              StockState(
+                status: RequestStatus.inProgress,
+                startDate: fromDate,
+                endDate: toDate,
+              ),
               StockState(
                 status: RequestStatus.failure,
                 error: 'Failed to fetch stock data',
+                startDate: fromDate,
+                endDate: toDate,
               ),
             ],
         verify: (cubit) {
@@ -155,4 +163,197 @@ void main() {
       );
     });
   });
+
+  group('setInterval', () {
+    final mockStockModel = _createMockStockModel();
+    final startDate = DateTime(2023, 1, 1);
+    final endDate = DateTime(2023, 12, 31);
+
+    test('should update interval in state', () {
+      // Arrange
+      when(
+        mockStockRepository.getStockChartData(
+          fromDate: anyNamed('fromDate'),
+          toDate: anyNamed('toDate'),
+          interval: anyNamed('interval'),
+        ),
+      ).thenAnswer((_) async => ApiResult.success(mockStockModel));
+
+      // Act
+      stockCubit.setInterval(ChartInterval.day);
+
+      // Assert
+      expect(stockCubit.state.interval, equals(ChartInterval.day));
+    });
+
+    blocTest<StockCubit, StockState>(
+      'should update interval and call getStockChartData with updated interval',
+      build: () {
+        when(
+          mockStockRepository.getStockChartData(
+            fromDate: anyNamed('fromDate'),
+            toDate: anyNamed('toDate'),
+            interval: ChartInterval.month,
+          ),
+        ).thenAnswer((_) async => ApiResult.success(mockStockModel));
+
+        return stockCubit;
+      },
+      seed:
+          () => StockState(
+            status: RequestStatus.initial,
+            startDate: startDate,
+            endDate: endDate,
+          ),
+      act: (cubit) => cubit.setInterval(ChartInterval.month),
+      expect:
+          () => [
+            predicate<StockState>(
+              (state) =>
+                  state.interval == ChartInterval.month &&
+                  state.status == RequestStatus.initial,
+            ),
+            predicate<StockState>(
+              (state) =>
+                  state.interval == ChartInterval.month &&
+                  state.status == RequestStatus.inProgress,
+            ),
+            predicate<StockState>(
+              (state) =>
+                  state.interval == ChartInterval.month &&
+                  state.status == RequestStatus.success &&
+                  state.stock == mockStockModel,
+            ),
+          ],
+      verify: (_) {
+        verify(
+          mockStockRepository.getStockChartData(
+            fromDate: startDate,
+            toDate: endDate,
+            interval: ChartInterval.month,
+          ),
+        ).called(1);
+      },
+    );
+  });
+
+  group('setDateRange', () {
+    final mockStockModel = _createMockStockModel();
+    final startDate = DateTime(2023, 1, 1);
+    final endDate = DateTime(2023, 12, 31);
+    final newStartDate = DateTime(2023, 6, 1);
+    final newEndDate = DateTime(2023, 6, 30);
+
+    blocTest<StockCubit, StockState>(
+      'should update date range and call getStockChartData with new dates',
+      build: () {
+        when(
+          mockStockRepository.getStockChartData(
+            fromDate: newStartDate,
+            toDate: newEndDate,
+            interval: ChartInterval.week,
+          ),
+        ).thenAnswer((_) async => ApiResult.success(mockStockModel));
+
+        return stockCubit;
+      },
+      seed:
+          () => StockState(
+            status: RequestStatus.initial,
+            startDate: startDate,
+            endDate: endDate,
+          ),
+      act: (cubit) => cubit.setDateRange(newStartDate, newEndDate),
+      expect:
+          () => [
+            StockState(
+              status: RequestStatus.inProgress,
+              startDate: newStartDate,
+              endDate: newEndDate,
+            ),
+            StockState(
+              status: RequestStatus.success,
+              startDate: newStartDate,
+              endDate: newEndDate,
+              stock: mockStockModel,
+            ),
+          ],
+      verify: (_) {
+        verify(
+          mockStockRepository.getStockChartData(
+            fromDate: newStartDate,
+            toDate: newEndDate,
+            interval: ChartInterval.week,
+          ),
+        ).called(1);
+      },
+    );
+
+    blocTest<StockCubit, StockState>(
+      'should handle API failure when setting date range',
+      build: () {
+        final errorHandler = ErrorHandler.handle(Exception());
+
+        when(
+          mockStockRepository.getStockChartData(
+            fromDate: newStartDate,
+            toDate: newEndDate,
+            interval: ChartInterval.week,
+          ),
+        ).thenAnswer((_) async => ApiResult.failure(errorHandler));
+
+        return stockCubit;
+      },
+      seed:
+          () => StockState(
+            status: RequestStatus.initial,
+            startDate: startDate,
+            endDate: endDate,
+          ),
+      act: (cubit) => cubit.setDateRange(newStartDate, newEndDate),
+      expect:
+          () => [
+            StockState(
+              status: RequestStatus.inProgress,
+              startDate: newStartDate,
+              endDate: newEndDate,
+            ),
+            StockState(
+              status: RequestStatus.failure,
+              error: ApiErrors.defaultError,
+              startDate: newStartDate,
+              endDate: newEndDate,
+            ),
+          ],
+    );
+  });
+}
+
+// Helper function to create a mock StockModel
+StockModel _createMockStockModel() {
+  return StockModel(
+    symbol: 'SPUS',
+    companyName: 'SP Funds S&P 500 Sharia ETF',
+    currentPrice: 38.57,
+    previousClose: 38.25,
+    priceStats: PriceStats(
+      dayHigh: 38.63,
+      dayLow: 38.02,
+      fiftyTwoWeekHigh: 44.69,
+      fiftyTwoWeekLow: 33.32,
+      volume: 347015,
+    ),
+    candlestickData: CandlestickData(
+      entries: [
+        CandlestickEntry(
+          timestamp: 1701406800,
+          open: 32.75,
+          high: 34.375,
+          low: 32.43,
+          close: 34.20,
+          volume: 2819700,
+        ),
+      ],
+    ),
+  );
 }
